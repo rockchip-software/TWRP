@@ -588,7 +588,7 @@ static int check_file(DOS_FS * fs, DOS_FILE * file)
 		("%s\n  File size is %u bytes, cluster chain length is > %lu "
 		 "bytes.\n  Truncating file to %u bytes.\n", path_name(file),
 		 le32toh(file->dir_ent.size),
-		 (uint64_t)clusters * fs->cluster_size,
+		 (unsigned long)clusters * fs->cluster_size,
 		 le32toh(file->dir_ent.size));
 	    truncate_file(fs, file, clusters);
 	    break;

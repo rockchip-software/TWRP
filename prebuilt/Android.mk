@@ -329,8 +329,14 @@ ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 25; echo $$?),0)
     endif
 endif
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 27; echo $$?),0)
+ifeq ($(TARGET_ARCH),arm)
+	RELINK_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libclang_rt.ubsan_standalone-arm-android.so
+else ifeq ($(TARGET_ARCH),arm64)
     RELINK_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/libclang_rt.ubsan_standalone-aarch64-android.so
-    RELINK_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/liblogwrap.so
+else
+	$(error No suitable architecture)
+endif
+  RELINK_SOURCE_FILES += $(TARGET_OUT_SHARED_LIBRARIES)/liblogwrap.so
 endif
 
 TW_BB_SYMLINKS :=
