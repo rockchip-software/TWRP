@@ -21,7 +21,7 @@
     选择Android编译模式，一般情况下选择rk****-userdebug模式。
 7.  修改device/rockchip/common/device.mk
 
-    `TARGET_TWRP_FLAG := true`
+    `BOARD_TWRP_ENABLE := true`
 8.  make clean
 
     清除之前编译的内容，由于已经生成的out目录中的文件与TWRP冲突，会导致TWRP编译失败。
@@ -33,7 +33,7 @@
 
 **<font color=red>注意：备份的原版recovery务必保留，此TWRP无法与SDK进行完整编译，目前只能单独编译，编译完整update.img或者ota包，都无法使用TWRP作为recovery，目前此twrp只作为单独镜像提供。删除原版recovery的一切后果概不负责。</font>**
 
-**在device/rockchip/common/device.mk中，变量TARGET_TWRP_FLAG即为控制是否加入TWRP选项的开关，暂无编译TWRP时，请关闭此选项。**
+**在device/rockchip/common/device.mk中，变量BOARD_TWRP_ENABLE即为控制是否加入TWRP选项的开关，暂无编译TWRP时，请关闭此选项。**
 
 ##  变量说明
 

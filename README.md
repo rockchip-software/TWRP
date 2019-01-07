@@ -21,7 +21,7 @@
     Select Android compile mode, generally choose rk****-userdebug mode.
 7.  modify device/rockchip/common/device.mk
 
-    `TARGET_TWRP_FLAG := true`
+    `BOARD_TWRP_ENABLE := true`
 8.  make clean
 
     Clearing the previously compiled content, because the files in the out directory that have been generated conflict with TWRP, will cause TWRP compilation to fail.
@@ -33,7 +33,7 @@
 
 **<font color=red>Note: The original recovery of the backup must be retained. This TWRP cannot be fully compiled with the SDK. Currently, it can only be compiled separately. Compiling the complete update.img or ota package cannot use TWRP as the recovery. Currently, this TWRP is only provided as a separate image. It is not responsible for the consequences of deleting the original recovery.</font>**
 
-**In device/rockchip/common/device.mk, the variable TARGET_TWRP_FLAG is the switch that controls whether to add the TWRP option. If you do not compile TWRP, please turn off this option.**
+**In device/rockchip/common/device.mk, the variable BOARD_TWRP_ENABLE is the switch that controls whether to add the TWRP option. If you do not compile TWRP, please turn off this option.**
 
 ##  Variable Description
 
