@@ -102,6 +102,9 @@ class Keymaster {
     explicit operator bool() { return mDevice.get() != nullptr; }
     // Generate a key in the keymaster from the given params.
     bool generateKey(const km::AuthorizationSet& inParams, std::string* key);
+    // Export a key from keymaster.
+    km::ErrorCode exportKey(km::KeyFormat format, KeyBuffer& kmKey, const std::string& clientId,
+                   const std::string& appData, std::string* key);
     // If the keymaster supports it, permanently delete a key.
     bool deleteKey(const std::string& key);
     // Replace stored key blob in response to KM_ERROR_KEY_REQUIRES_UPGRADE.
@@ -142,10 +145,10 @@ enum class KeymasterSignResult {
     upgrade = -2,
 };
 
-int keymaster_compatibility_cryptfs_scrypt();
-int keymaster_create_key_for_cryptfs_scrypt(uint32_t rsa_key_size, uint64_t rsa_exponent,
+//int keymaster_compatibility_cryptfs_scrypt();
+/*int keymaster_create_key_for_cryptfs_scrypt(uint32_t rsa_key_size, uint64_t rsa_exponent,
                                             uint32_t ratelimit, uint8_t* key_buffer,
-                                            uint32_t key_buffer_size, uint32_t* key_out_size);
+                                            uint32_t key_buffer_size, uint32_t* key_out_size);*/
 
 int keymaster_upgrade_key_for_cryptfs_scrypt(uint32_t rsa_key_size, uint64_t rsa_exponent,
                                              uint32_t ratelimit, const uint8_t* key_blob,

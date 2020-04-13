@@ -142,6 +142,32 @@ bool Keymaster::generateKey(const km::AuthorizationSet& inParams, std::string* k
     return true;
 }
 
+km::ErrorCode Keymaster::exportKey(km::KeyFormat format, KeyBuffer& kmKey, const std::string& clientId,
+                          const std::string& appData, std::string* key) {
+    auto kmKeyBlob = km::support::blob2hidlVec(std::string(kmKey.data(), kmKey.size()));
+    auto emptyAssign = NULL;
+    auto kmClientId = (clientId == "!") ? emptyAssign: km::support::blob2hidlVec(clientId);
+    auto kmAppData = (appData == "!") ? emptyAssign: km::support::blob2hidlVec(appData);
+    km::ErrorCode km_error;
+    auto hidlCb = [&](km::ErrorCode ret, const hidl_vec<uint8_t>& exportedKeyBlob) {
+        km_error = ret;
+        if (km_error != km::ErrorCode::OK) return;
+        if(key)
+            key->assign(reinterpret_cast<const char*>(&exportedKeyBlob[0]),
+                            exportedKeyBlob.size());
+    };
+    auto error = mDevice->exportKey(format, kmKeyBlob, kmClientId, kmAppData, hidlCb);
+    if (!error.isOk()) {
+        LOG(ERROR) << "export_key failed: " << error.description();
+        return km::ErrorCode::UNKNOWN_ERROR;
+    }
+    if (km_error != km::ErrorCode::OK) {
+        LOG(ERROR) << "export_key failed, code " << int32_t(km_error);
+        return km_error;
+    }
+    return km::ErrorCode::OK;
+}
+
 bool Keymaster::deleteKey(const std::string& key) {
     LOG(ERROR) << "not actually deleting key\n";
     return true;
@@ -218,6 +244,7 @@ bool Keymaster::isSecure() {
 
 using namespace ::android::vold;
 
+/*
 int keymaster_compatibility_cryptfs_scrypt() {
     Keymaster dev;
     if (!dev) {
@@ -226,6 +253,7 @@ int keymaster_compatibility_cryptfs_scrypt() {
     }
     return dev.isSecure();
 }
+*/
 
 static bool write_string_to_buf(const std::string& towrite, uint8_t* buffer, uint32_t buffer_size,
                                 uint32_t* out_size) {
@@ -253,6 +281,7 @@ static km::AuthorizationSet keyParams(uint32_t rsa_key_size, uint64_t rsa_expone
         .Authorization(km::TAG_MIN_SECONDS_BETWEEN_OPS, ratelimit);
 }
 
+/*
 int keymaster_create_key_for_cryptfs_scrypt(uint32_t rsa_key_size, uint64_t rsa_exponent,
                                             uint32_t ratelimit, uint8_t* key_buffer,
                                             uint32_t key_buffer_size, uint32_t* key_out_size) {
@@ -269,6 +298,7 @@ int keymaster_create_key_for_cryptfs_scrypt(uint32_t rsa_key_size, uint64_t rsa_
     if (!write_string_to_buf(key, key_buffer, key_buffer_size, key_out_size)) return -1;
     return 0;
 }
+*/
 
 int keymaster_upgrade_key_for_cryptfs_scrypt(uint32_t rsa_key_size, uint64_t rsa_exponent,
                                              uint32_t ratelimit, const uint8_t* key_blob,
