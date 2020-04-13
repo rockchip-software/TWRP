@@ -1,4 +1,6 @@
 import /init.recovery.logd.rc
+import /init.recovery.ldconfig.rc
+import /init.recovery.mksh.rc
 import /init.recovery.usb.rc
 import /init.recovery.service.rc
 import /init.recovery.vold_decrypt.rc
@@ -17,6 +19,10 @@ on early-init
     # Set the security context of /postinstall if present.
     restorecon /postinstall
 
+    # ueventd wants to write to /acct
+    mount cgroup none /acct cpuacct
+    mkdir /acct/uid
+
     start ueventd
 
 service set_permissive /sbin/permissive.sh
@@ -31,10 +37,6 @@ on init
     export ANDROID_DATA /data
     export EXTERNAL_STORAGE /sdcard
 
-    mount cgroup none /acct cpuacct
-    mkdir /acct/uid
-
-    mkdir /sdcard
     mkdir /system
     mkdir /data
     mkdir /cache

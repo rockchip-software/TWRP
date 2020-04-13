@@ -78,8 +78,13 @@ GUICheckbox::GUICheckbox(xml_node<>* node)
 		if (attr)
 			mVarName = attr->value();
 		attr = child->first_attribute("default");
-		if (attr)
+		if (attr) {
 			DataManager::SetValue(mVarName, attr->value());
+		} else {
+			int val;
+			if (DataManager::GetValue(mVarName, val) != 0)
+				DataManager::SetValue(mVarName, 0); // Prevents check boxes from having to be tapped twice the first time
+		}
 	}
 
 	mCheckW = mCheckH = 0;
@@ -179,7 +184,10 @@ int GUICheckbox::NotifyTouch(TOUCH_STATE state, int x __unused, int y __unused)
 		lastState = (lastState == 0) ? 1 : 0;
 		DataManager::SetValue(mVarName, lastState);
 
+#ifndef TW_NO_HAPTICS
 		DataManager::Vibrate("tw_button_vibrate");
+#endif
+
 	}
 	return 0;
 }

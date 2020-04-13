@@ -43,8 +43,7 @@ endif
 ifeq ($(TW_USE_TOOLBOX), true)
     ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 22; echo $$?),0)
         # These are the only toolbox tools in M. The rest are now in toybox.
-        BSD_TOOLS := \
-            $(if $(filter $(PLATFORM_SDK_VERSION), 23 24), du)
+        BSD_TOOLS :=
 
         OUR_TOOLS := \
             newfs_msdos
@@ -60,9 +59,10 @@ ifeq ($(TW_USE_TOOLBOX), true)
                 stop
         endif
 
-        ifneq (,$(filter $(PLATFORM_SDK_VERSION), 23))
+        ifeq ($(shell test $(PLATFORM_SDK_VERSION) -lt 24; echo $$?),0)
             BSD_TOOLS += \
                 dd \
+                du \
 
             OUR_TOOLS += \
                 df \
@@ -165,6 +165,7 @@ ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 27; echo $$?),0)
     OUR_TOOLS += getevent
     LOCAL_C_INCLUDES += $(TWRP_TOOLBOX_PATH)
     LOCAL_WHOLE_STATIC_LIBRARIES += libtoolbox_dd
+
     ifneq ($(TW_USE_TOOLBOX), true)
         OUR_TOOLS += newfs_msdos
     endif
@@ -314,6 +315,36 @@ ifneq (,$(filter $(PLATFORM_SDK_VERSION),16 17 18))
     ALL_DEFAULT_INSTALLED_MODULES += $(SYMLINKS)
     ALL_MODULES.$(LOCAL_MODULE).INSTALLED := \
         $(ALL_MODULES.$(LOCAL_MODULE).INSTALLED) $(SYMLINKS)
+endif
+
+ifeq ($(TW_USE_TOOLBOX), true)
+    ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 23; echo $$?),0)
+        include $(CLEAR_VARS)
+        LOCAL_MODULE := dd_twrp
+        LOCAL_MODULE_STEM := dd
+        LOCAL_MODULE_PATH := $(TARGET_RECOVERY_ROOT_OUT)/sbin
+        LOCAL_MODULE_TAGS := optional
+        LOCAL_CFLAGS := -include bsd-compatibility.h -DNO_CONV -Wno-unused-parameter
+        LOCAL_C_INCLUDES := system/core/toolbox/upstream-netbsd/include/ system/core/toolbox/upstream-netbsd/bin/dd system/core/toolbox
+
+        LOCAL_SHARED_LIBRARIES := \
+	        libcutils \
+
+        LOCAL_SRC_FILES += \
+            upstream-netbsd/bin/dd/args.c \
+            upstream-netbsd/bin/dd/conv.c \
+            upstream-netbsd/bin/dd/dd.c \
+            upstream-netbsd/bin/dd/dd_hostops.c \
+            upstream-netbsd/bin/dd/misc.c \
+            upstream-netbsd/bin/dd/position.c \
+            upstream-netbsd/lib/libc/gen/getbsize.c \
+            upstream-netbsd/lib/libc/gen/humanize_number.c \
+            upstream-netbsd/lib/libc/stdlib/strsuftoll.c \
+            upstream-netbsd/lib/libc/string/swab.c \
+            upstream-netbsd/lib/libutil/raise_default_signal.c
+
+        include $(BUILD_EXECUTABLE)
+    endif
 endif
 
 SYMLINKS :=

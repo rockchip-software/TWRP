@@ -177,7 +177,6 @@ bool twrpAdbBuFifo::Restore_ADB_Backup(void) {
 	part_settings.total_restore_size = 0;
 
 	PartitionManager.Mount_All_Storage();
-	DataManager::SetValue(TW_SKIP_DIGEST_CHECK_VAR, 0);
 	LOGINFO("opening TW_ADB_BU_CONTROL\n");
 	adb_control_bu_fd = open(TW_ADB_BU_CONTROL, O_WRONLY | O_NONBLOCK);
 	LOGINFO("opening TW_ADB_TWRP_CONTROL\n");
@@ -274,7 +273,6 @@ bool twrpAdbBuFifo::Restore_ADB_Backup(void) {
 					Backup_FileName = Restore_Name.substr(pos + 1, Restore_Name.size());
 					part_settings.Part = PartitionManager.Find_Partition_By_Path(path);
 					part_settings.Backup_Folder = path;
-					PartitionManager.Set_Restore_Files(path);
 					part_settings.partition_count = partition_count;
 					part_settings.adbbackup = true;
 					part_settings.adb_compression = twimghdr.compressed;
@@ -309,7 +307,7 @@ bool twrpAdbBuFifo::Restore_ADB_Backup(void) {
 					part_settings.Part->Set_Backup_FileName(Backup_FileName);
 					PartitionManager.Set_Restore_Files(path);
 
-					if (path.compare("/system") == 0) {
+					if (path.compare(PartitionManager.Get_Android_Root_Path()) == 0) {
 						if (part_settings.Part->Is_Read_Only()) {
 							if (!twadbbu::Write_TWERROR())
 								LOGERR("Unable to write to TWRP ADB Backup.\n");

@@ -189,6 +189,15 @@ LOCAL_SRC_FILES := \
     toys/posix/wc.c \
     toys/posix/xargs.c
 
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -eq 26; echo $$?),0)
+# Android 8.0 had some tools in different paths
+LOCAL_SRC_FILES += \
+    toys/pending/dmesg.c
+else
+LOCAL_SRC_FILES += \
+    toys/lsb/dmesg.c
+endif
+
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 23; echo $$?),0)
 # there are some conflicts here with AOSP-7.[01] and CM-14.[01]
 # the following items have been removed for compatibility
@@ -221,14 +230,6 @@ LOCAL_SRC_FILES += \
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -lt 27; echo $$?),0)
 LOCAL_SRC_FILES += \
     toys/pending/xzcat.c
-endif
-ifeq ($(shell test $(PLATFORM_SDK_VERSION) -eq 26; echo $$?),0)
-# Android 8.0 had some tools in different paths
-LOCAL_SRC_FILES += \
-    toys/pending/dmesg.c
-else
-LOCAL_SRC_FILES += \
-    toys/lsb/dmesg.c
 endif
 
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 25; echo $$?),0)
@@ -319,6 +320,7 @@ LOCAL_SRC_FILES += \
 endif
 
 LOCAL_CFLAGS += \
+    -std=c99 \
     -std=gnu11 \
     -Os \
     -Wno-char-subscripts \
@@ -330,8 +332,13 @@ LOCAL_CFLAGS += \
     -ffunction-sections -fdata-sections \
     -fno-asynchronous-unwind-tables \
 
-toybox_version := $(shell sed 's/#define.*TOYBOX_VERSION.*"\(.*\)"/\1/p;d' $(LOCAL_PATH)/main.c)
-LOCAL_CFLAGS += -DTOYBOX_VERSION=\"$(toybox_version)\"
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -lt 24; echo $$?),0)
+    toybox_version := $(shell git -C $(LOCAL_PATH) rev-parse --short=12 HEAD 2>/dev/null)-android
+    LOCAL_CFLAGS += -DTOYBOX_VERSION='"$(toybox_version)"'
+else
+    toybox_version := $(shell sed 's/#define.*TOYBOX_VERSION.*"\(.*\)"/\1/p;d' $(LOCAL_PATH)/main.c)
+    LOCAL_CFLAGS += -DTOYBOX_VERSION=\"$(toybox_version)\"
+endif
 
 LOCAL_CLANG := true
 
@@ -478,18 +485,14 @@ ALL_TOOLS += \
     arp \
     base64 \
     chattr \
-    dd \
     df \
     diff \
-    egrep \
-    fgrep \
     flock \
     freeramdisk \
     fsfreeze \
     fstype \
     ftpget \
     ftpput \
-    grep \
     help \
     install \
     ionice \
@@ -532,7 +535,7 @@ ALL_TOOLS += \
     vconfig \
     watch \
     xxd
-ifeq ($(shell test $(PLATFORM_SDK_VERSION) -lt 27; echo $$?),0)
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -le 27; echo $$?),0)
 ALL_TOOLS += \
     getprop \
     xzcat
@@ -543,7 +546,7 @@ ALL_TOOLS += \
     gzip \
     gunzip \
     zcat
-ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 27; echo $$?),0)
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -gt 25; echo $$?),0)
 ALL_TOOLS += \
     fmt \
     start \
