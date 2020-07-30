@@ -78,9 +78,9 @@ int main(int argc, char **argv) {
 	Log_Offset = 0;
 
 	// Set up temporary log file (/tmp/recovery.log)
-	freopen(TMP_LOG_FILE, "a", stdout);
+	freopen(/*TMP_LOG_FILE*/"/dev/console", "a", stdout);
 	setbuf(stdout, NULL);
-	freopen(TMP_LOG_FILE, "a", stderr);
+	freopen(/*TMP_LOG_FILE*/"/dev/console", "a", stderr);
 	setbuf(stderr, NULL);
 
 	signal(SIGPIPE, SIG_IGN);
